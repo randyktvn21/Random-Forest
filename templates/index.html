@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garbage Classification with Random Forest</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1b4d3e;
+            --secondary-color: #2d8659;
+            --background-color: #0a2518;
+            --card-bg: #1b4d3e;
+            --text-color: #ffffff;
+            --muted-color: #90b4a4;
+            --border-color: #34a853;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .main-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .header {
+            background: var(--primary-color);
+            padding: 2rem;
+            text-align: center;
+            color: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .header p {
+            margin: 1rem 0 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content-section {
+            padding: 2rem;
+            background: var(--card-bg);
+        }
+
+        .upload-container {
+            background: var(--primary-color);
+            border: 2px dashed var(--border-color);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-container:hover {
+            border-color: var(--text-color);
+            background: var(--secondary-color);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .btn-classify {
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .btn-classify:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+            border-color: var(--text-color);
+        }
+
+        #preview-image {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 1rem;
+        }
+
+        .result-card {
+            background: var(--primary-color);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        .prediction-label {
+            font-size: 1.8rem;
+            color: var(--text-color);
+            font-weight: 700;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .confidence-section {
+            margin-top: 1.5rem;
+        }
+
+        .progress {
+            height: 1.5rem;
+            border-radius: 1rem;
+            background: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar {
+            background: linear-gradient(45deg, var(--secondary-color), #444444);
+            border-radius: 1rem;
+        }
+
+        .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+
+        .text-muted {
+            color: var(--muted-color) !important;
+        }
+
+        .card {
+            background: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content-section {
+                padding: 1.5rem;
+            }
+        }
+
+        .confusion-matrix-img {
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            background-color: var(--primary-color);
+            padding: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .confusion-matrix-img:hover {
+            transform: scale(1.02);
+            border-color: var(--text-color);
+        }
+
+        h4, h5 {
+            color: var(--text-color) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-card animate-fade-in">
+            <div class="header">
+                <h1><i class="fas fa-recycle me-2"></i>Garbage Classification</h1>
+                <p>Identify and classify different types of waste materials</p>
+            </div>
+            
+            <div class="content-section">
+                <div class="upload-container" id="upload-area">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h3>Upload Image</h3>
+                    <p class="text-muted">Drag and drop your image here or click to browse</p>
+                    <input type="file" id="image-upload" class="d-none" accept=".jpg,.jpeg,.png">
+                    <button class="btn btn-classify">
+                        <i class="fas fa-magic me-2"></i>Classify Image
+                    </button>
+                </div>
+
+                <div id="result-section" class="result-card" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <img id="preview-image" class="img-fluid">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <i class="fas fa-tag category-icon"></i>
+                                <h4>Classification Result</h4>
+                                <div id="prediction-text" class="prediction-label"></div>
+                                
+                                <div class="confidence-section">
+                                    <h5><i class="fas fa-chart-line me-2"></i>Confidence Level</h5>
+                                    <div class="progress">
+                                        <div id="confidence-bar" class="progress-bar" role="progressbar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Confusion Matrix Section -->
+                    <div class="mt-5">
+                        <h4 class="text-center mb-4" style="color: var(--primary-color);">
+                            <i class="fas fa-table me-2"></i>Model Performance
+                        </h4>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <img src="{{ url_for('static', filename='confusion_matrix.png') }}" 
+                                         class="img-fluid rounded confusion-matrix-img" 
+                                         alt="Confusion Matrix"
+                                         style="max-width: 100%; height: auto;">
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <p class="text-muted">Confusion Matrix showing model's classification performance across different categories</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.getElementById('upload-area');
+            const fileInput = document.getElementById('image-upload');
+            const uploadForm = document.getElementById('upload-form');
+            const resultSection = document.getElementById('result-section');
+            const previewImage = document.getElementById('preview-image');
+            const predictionText = document.getElementById('prediction-text');
+            const confidenceBar = document.getElementById('confidence-bar');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#4CAF50';
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = '#dee2e6';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#dee2e6';
+                const files = e.dataTransfer.files;
+                if (files.length) {
+                    fileInput.files = files;
+                    handleImageUpload(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleImageUpload(e.target.files[0]);
+                }
+            });
+
+            function handleImageUpload(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    // Here you would typically make the API call to your classification endpoint
+                    // For demo purposes, we'll show the result section with dummy data
+                    resultSection.style.display = 'block';
+                    predictionText.textContent = 'Processing...';
+                    confidenceBar.style.width = '0%';
+                    
+                    // Simulate API call
+                    setTimeout(() => {
+                        const dummyResult = {
+                            prediction: 'Plastic',
+                            confidence: 85
+                        };
+                        showResult(dummyResult);
+                    }, 1500);
+                };
+                reader.readAsDataURL(file);
+            }
+
+            function showResult(result) {
+                predictionText.textContent = result.prediction;
+                confidenceBar.style.width = `${result.confidence}%`;
+                confidenceBar.setAttribute('aria-valuenow', result.confidence);
+                resultSection.classList.add('animate-fade-in');
+            }
+        });
+    </script>
+</body>
+</html> 

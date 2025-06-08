@@ -1,0 +1,117 @@
+body {
+    background-color: #f0f7f0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border: none;
+    border-radius: 15px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    color: white;
+    border-radius: 15px 15px 0 0 !important;
+    padding: 1.5rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    border: none;
+    padding: 12px 35px;
+    border-radius: 25px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
+    background: linear-gradient(135deg, #27ae60 0%, #219a52 100%);
+}
+
+.progress {
+    height: 25px;
+    border-radius: 12px;
+    background-color: #e8f5e9;
+}
+
+.progress-bar {
+    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    transition: width 0.8s ease;
+}
+
+#preview-image {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+#preview-image:hover {
+    transform: scale(1.02);
+}
+
+.form-control {
+    border-radius: 10px;
+    padding: 12px;
+    border: 2px solid #e8f5e9;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #2ecc71;
+    box-shadow: 0 0 0 0.2rem rgba(46, 204, 113, 0.25);
+}
+
+#result-section {
+    animation: fadeIn 0.7s ease-in;
+}
+
+.container {
+    padding: 2rem 1rem;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.text-primary {
+    color: #2ecc71 !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f0f7f0;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2ecc71;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #27ae60;
+} 
